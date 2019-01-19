@@ -14,6 +14,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var ball = SCNNode()
+    var box = SCNNode()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,10 +27,40 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.showsStatistics = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene(named: "art.scnassets/MainScene.scn")!
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        let dummyNode = scene.rootNode.childNode(withName: "dummyNode", recursively: false)
+        dummyNode?.position = SCNVector3(0, -5, -5)
+        
+        self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
+            if (node.name == "ball") {
+                print ("found ball")
+                ball = node
+                ball.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node:ball, options:nil))
+                ball.physicsBody?.isAffectedByGravity = true
+                ball.physicsBody?.restitution = 1
+                
+            } else if (node.name == "ball") {
+                print ("found box")
+                box = node
+                let boxGeometry = box.geometry
+                let boxShape:SCNPhysicsShape = SCNPhysicsShape(geometry: boxGeometry!, options: nil)
+                box.physicsBody = SCNPhysicsBody(type: .static, shape: boxShape)
+                box.physicsBody?.restitution = 1
+                
+            }
+        }
+        
+        let light = SCNLight()
+        light.type = SCNLight.LightType.omni
+        let lightNode = SCNNode()
+        lightNode.light = light
+        lightNode.position = SCNVector3(x:1.5, y:1.5, z:1.5)
+        scene.rootNode.addChildNode(lightNode)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
